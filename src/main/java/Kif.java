@@ -48,14 +48,16 @@ public class Kif {
          */
         introduce();
         String userMessage = reader.readLine();
-        while(!isTerminate(userMessage)) {
-            if(userMessage.equals("list")) {
-                Storage.listUserTexts();
-            }
-            else {
-                Storage.addUserTexts(userMessage);
+        String[] splitMessage = userMessage.split(" ");
+        while(!isTerminate(splitMessage[0])) {
+            switch (splitMessage[0]) {
+                case "list" -> Task.listUserTask();
+                case "mark" -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
+                case "unmark" -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
+                default -> Task.addUserTask(userMessage);
             }
             userMessage = reader.readLine();
+            splitMessage = userMessage.split(" ");
         }
         goodbye();
     }
