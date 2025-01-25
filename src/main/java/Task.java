@@ -4,15 +4,13 @@ class Task {
     private static final ArrayList<Task> userTasks = new ArrayList<>();
     protected String description;
     protected boolean isDone;
-    private static int counter = 0;
     protected int key;
 
     public Task(String description) {
         this.description = description;
         this.isDone = false;
-        Task.counter++;
-        this.key = Task.counter;
         Task.userTasks.add(this);
+        this.key = Task.userTasks.size();
     }
 
     public String getStatusIcon() {
@@ -52,6 +50,16 @@ class Task {
         System.out.println("____________________________________________________________");
         System.out.println("OK, I've marked this task as not done yet:");
         System.out.println(currentTask);
+        System.out.println("____________________________________________________________");
+    }
+
+    public static void delete(int key) {
+        Task currentTask = userTasks.get(key - 1);
+        userTasks.remove(key - 1);
+        System.out.println("____________________________________________________________");
+        System.out.println("Noted. I've removed this task:");
+        System.out.println(currentTask);
+        Task.printTotalTasks();
         System.out.println("____________________________________________________________");
     }
 

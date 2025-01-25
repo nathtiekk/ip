@@ -15,6 +15,16 @@ public class Kif {
         System.out.println(introduce);
     }
 
+    public enum UserCommand {
+        LIST,
+        MARK,
+        UNMARK,
+        DEADLINE,
+        EVENT,
+        TODO,
+        DELETE;
+    }
+
     private static void goodbye() {
         String goodbye =
                 """
@@ -34,13 +44,15 @@ public class Kif {
         String userMessage = reader.readLine();
         String[] splitMessage = userMessage.split(" ");
         while(!isTerminate(splitMessage[0])) {
-            switch (splitMessage[0]) {
-                case "list" -> Task.listUserTask();
-                case "mark" -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
-                case "unmark" -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
-                case "deadline" -> Task.Deadline.createDeadline(userMessage);
-                case "event" -> Task.Event.createEvent(userMessage);
-                case "todo" -> {
+            UserCommand command = UserCommand.valueOf(splitMessage[0].toUpperCase());
+            switch (command) {
+                case LIST -> Task.listUserTask();
+                case MARK -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
+                case UNMARK -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
+                case DEADLINE -> Task.Deadline.createDeadline(userMessage);
+                case EVENT -> Task.Event.createEvent(userMessage);
+                case DELETE -> Task.delete(Integer.parseInt(splitMessage[1]));
+                case TODO -> {
                     try {
                         Task.ToDo.createToDo(userMessage);
                     } catch (KifException e) {
