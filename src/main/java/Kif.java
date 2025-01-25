@@ -24,28 +24,12 @@ public class Kif {
         System.out.println(goodbye);
     }
 
-    private static void echo(String userMessage) {
-        String echoMessage =
-                "____________________________________________________________\n" +
-                 "Kif: " + userMessage + "\n" +
-                "____________________________________________________________\n";
-        System.out.println(echoMessage);
-    }
-
     private static boolean isTerminate(String code) {
         return code.equals("bye");
     }
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        /*
-        String logo = " ____        _        \n"
-                + "|  _ \\ _   _| | _____ \n"
-                + "| | | | | | | |/ / _ \\\n"
-                + "| |_| | |_| |   <  __/\n"
-                + "|____/ \\__,_|_|\\_\\___|\n";
-        System.out.println("Hello from\n" + logo);
-         */
         introduce();
         String userMessage = reader.readLine();
         String[] splitMessage = userMessage.split(" ");
@@ -56,7 +40,19 @@ public class Kif {
                 case "unmark" -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
                 case "deadline" -> Task.Deadline.createDeadline(userMessage);
                 case "event" -> Task.Event.createEvent(userMessage);
-                default -> Task.ToDo.createToDo(userMessage);
+                case "todo" -> {
+                    try {
+                        Task.ToDo.createToDo(userMessage);
+                    } catch (KifException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+                default -> System.out.println(
+                                    """
+                                    ____________________________________________________________
+                                    OOPS!!! I'm sorry, but I don't know what that means :-(
+                                    ____________________________________________________________"""
+                );
             }
             userMessage = reader.readLine();
             splitMessage = userMessage.split(" ");

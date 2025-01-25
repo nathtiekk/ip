@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 class Task {
-    private static final ArrayList<Task> userTasks = new ArrayList<Task>();
+    private static final ArrayList<Task> userTasks = new ArrayList<>();
     protected String description;
     protected boolean isDone;
     private static int counter = 0;
@@ -110,11 +110,21 @@ class Task {
     public static class ToDo extends Task {
 
         public ToDo(String description) {
-            super(description.replace("todo ", ""));
+            super(description);
         }
 
-        public static void createToDo(String description) {
-            Task toDoTask = new ToDo(description);
+        public static void createToDo(String description) throws KifException {
+            String cleanInput = description.replace("todo", "");
+            if(cleanInput.trim().isEmpty()) {
+                throw new KifException(
+                        """
+                        ____________________________________________________________
+                        OOPS!!! The description of a todo cannot be empty.
+                        ____________________________________________________________"""
+                );
+            }
+
+            Task toDoTask = new ToDo(cleanInput.trim());
             System.out.println("____________________________________________________________");
             System.out.println("Got it. I've added this task:");
             System.out.println(toDoTask);
