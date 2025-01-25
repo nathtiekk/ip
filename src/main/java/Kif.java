@@ -54,7 +54,9 @@ public class Kif {
                 case "list" -> Task.listUserTask();
                 case "mark" -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
                 case "unmark" -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
-                default -> Task.addUserTask(userMessage);
+                case "deadline" -> Task.Deadline.createDeadline(userMessage);
+                case "event" -> Task.Event.createEvent(userMessage);
+                default -> Task.ToDo.createToDo(userMessage);
             }
             userMessage = reader.readLine();
             splitMessage = userMessage.split(" ");

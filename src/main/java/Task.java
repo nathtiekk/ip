@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 class Task {
-    private static ArrayList<Task> userTasks = new ArrayList<Task>();
+    private static final ArrayList<Task> userTasks = new ArrayList<Task>();
     protected String description;
     protected boolean isDone;
     private static int counter = 0;
@@ -12,26 +12,28 @@ class Task {
         this.isDone = false;
         Task.counter++;
         this.key = Task.counter;
+        Task.userTasks.add(this);
     }
 
     public String getStatusIcon() {
         return (isDone ? "X" : " "); // mark done task with X
     }
 
+    @Override
+    public String toString() {
+        return "[" + this.getStatusIcon() + "] " + this.description;
+    }
+
+    public static void printTotalTasks() {
+        System.out.println("Now you have " + Task.userTasks.size() + " tasks in the list.");
+    }
+
     public static void listUserTask() {
         System.out.println("____________________________________________________________");
         System.out.println("Here are the tasks in your list:");
         for(Task userTask: Task.userTasks) {
-            System.out.println(userTask.key + ".[" + userTask.getStatusIcon() + "] " + userTask.description);
+            System.out.println(userTask.key + "." + userTask);
         }
-        System.out.println("____________________________________________________________");
-    }
-
-    public static void addUserTask(String userTask) {
-        Task createdTask = new Task(userTask);
-        Task.userTasks.add(createdTask);
-        System.out.println("____________________________________________________________");
-        System.out.println("added: " + createdTask.description);
         System.out.println("____________________________________________________________");
     }
 
@@ -40,7 +42,7 @@ class Task {
         currentTask.isDone = true;
         System.out.println("____________________________________________________________");
         System.out.println("Nice! I've marked this task as done:");
-        System.out.println("[X] " + currentTask.description);
+        System.out.println(currentTask);
         System.out.println("____________________________________________________________");
     }
 
@@ -49,9 +51,83 @@ class Task {
         currentTask.isDone = false;
         System.out.println("____________________________________________________________");
         System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println("[ ] " + currentTask.description);
+        System.out.println(currentTask);
         System.out.println("____________________________________________________________");
     }
+
+    public static class Deadline extends Task {
+
+        protected String by;
+
+        public Deadline(String description, String by) {
+            super(description);
+            this.by = by;
+        }
+
+        public static void createDeadline(String description) {
+            String[] information = description.split("/by");
+            Task deadlineTask = new Deadline(information[0].replace("deadline ", ""), information[1]);
+            System.out.println("____________________________________________________________");
+            System.out.println("Got it. I've added this task:");
+            System.out.println(deadlineTask);
+            Task.printTotalTasks();
+            System.out.println("____________________________________________________________");
+        }
+
+        @Override
+        public String toString() {
+            return "[D]" + super.toString() + "(by:" + by + ")";
+        }
+    }
+
+    public static class Event extends Task {
+
+        protected String start;
+        protected String end;
+
+        public Event(String description, String start, String end) {
+            super(description);
+            this.start = start;
+            this.end = end;
+        }
+
+        public static void createEvent(String description) {
+            String[] information = description.split("/from | /to");
+            Task eventTask = new Event(information[0].replace("event ", ""), information[1], information[2]);
+            System.out.println("____________________________________________________________");
+            System.out.println("Got it. I've added this task:");
+            System.out.println(eventTask);
+            Task.printTotalTasks();
+            System.out.println("____________________________________________________________");
+        }
+
+        @Override
+        public String toString() {
+            return "[E]" + super.toString() + "(from: " + start + " to:" + end + ")";
+        }
+    }
+
+    public static class ToDo extends Task {
+
+        public ToDo(String description) {
+            super(description.replace("todo ", ""));
+        }
+
+        public static void createToDo(String description) {
+            Task toDoTask = new ToDo(description);
+            System.out.println("____________________________________________________________");
+            System.out.println("Got it. I've added this task:");
+            System.out.println(toDoTask);
+            Task.printTotalTasks();
+            System.out.println("____________________________________________________________");
+        }
+
+        @Override
+        public String toString() {
+            return "[T]" + super.toString();
+        }
+    }
+
 
 
 }
