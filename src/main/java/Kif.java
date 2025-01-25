@@ -20,15 +20,14 @@ public class Kif {
                 """
                 ____________________________________________________________
                 Kif: Bye. Hope to see you again soon!
-                ____________________________________________________________
-                """;
+                ____________________________________________________________""";
         System.out.println(goodbye);
     }
 
     private static void echo(String userMessage) {
         String echoMessage =
                 "____________________________________________________________\n" +
-                "Kif: " + userMessage + "\n" +
+                 "Kif: " + userMessage + "\n" +
                 "____________________________________________________________\n";
         System.out.println(echoMessage);
     }
@@ -50,7 +49,12 @@ public class Kif {
         introduce();
         String userMessage = reader.readLine();
         while(!isTerminate(userMessage)) {
-            echo(userMessage);
+            if(userMessage.equals("list")) {
+                Storage.listUserTexts();
+            }
+            else {
+                Storage.addUserTexts(userMessage);
+            }
             userMessage = reader.readLine();
         }
         goodbye();
