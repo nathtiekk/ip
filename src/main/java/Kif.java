@@ -15,6 +15,12 @@ public class Kif {
         System.out.println(introduce);
     }
 
+    private static void bootUp() {
+        Task.initialiseUserTasks();
+        introduce();
+        Task.listUserTask();
+    }
+
     public enum UserCommand {
         LIST,
         MARK,
@@ -40,7 +46,7 @@ public class Kif {
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        introduce();
+        bootUp();
         String userMessage = reader.readLine();
         String[] splitMessage = userMessage.split(" ");
         while(!isTerminate(splitMessage[0])) {
