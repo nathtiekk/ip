@@ -13,6 +13,10 @@ import java.time.format.DateTimeParseException;
 
 import java.util.ArrayList;
 
+/**
+ * Functions like an abstract class;
+ * Has three subclasses: Todo, Deadline, and Event.
+ */
 class Task {
     private static final ArrayList<Task> userTasks = new ArrayList<>();
     protected String description;
@@ -29,6 +33,11 @@ class Task {
 
     public enum TaskType {TODO, DEADLINE, EVENT}
 
+    /**
+     * Loads up all the tasks saved previously by the user
+     * and catches FileNotFoundException, and KifException when file is not found,
+     * and when the file contents happen to not be readable respectively.
+     */
     public static void initialiseUserTasks() {
         try {
             File f = new File(FILE_PATH);
@@ -56,6 +65,11 @@ class Task {
         }
     }
 
+    /**
+     * Returns "X" if the Task is done, or " " otherwise.
+     *
+     * @return String "X" or " ".
+     */
     public String getStatusIcon() {
         // mark done task with X
         return (isDone ? "X" : " ");
@@ -66,6 +80,9 @@ class Task {
         return "[" + this.getStatusIcon() + "] " + this.description;
     }
 
+    /**
+     * Prints the number of task the user currently has thus far.
+     */
     public static void printTotalTasks() {
         System.out.println("Now you have " + Task.userTasks.size() + " tasks in the list.");
     }
@@ -150,6 +167,9 @@ class Task {
         }
     }
 
+    /**
+     * Numbers and list all the tasks a user has.
+     */
     public static void listUserTask() {
         System.out.println("____________________________________________________________");
         System.out.println("Here are the tasks in your list:");
@@ -161,6 +181,12 @@ class Task {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Marks the task specified by the user as done
+     * before showing a success message and the details of the marked task.
+     *
+     * @param key The position of the Task in the list from the user's perspective.
+     */
     public static void markUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = true;
@@ -172,6 +198,12 @@ class Task {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Unmarks the task specified by the user as undone
+     * before showing a success message and the details of the unmarked task.
+     *
+     * @param key The position of the Task in the list from the user's perspective.
+     */
     public static void unmarkUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = false;
@@ -183,6 +215,12 @@ class Task {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Deletes the task specified by the user before showing a success message,
+     * and the details of the deleted task.
+     *
+     * @param key The position of the Task in the list from the user's perspective.
+     */
     public static void delete(int key) {
         Task currentTask = userTasks.get(key - 1);
         userTasks.remove(key - 1);
@@ -195,6 +233,10 @@ class Task {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Represents a Task created by the user that has a deadline.
+     * Has an additional attribute, by, to store the dateline set by the user.
+     */
     public static class Deadline extends Task {
         protected LocalDate by;
 
@@ -236,6 +278,9 @@ class Task {
         }
     }
 
+    /**
+     * Represents a Task created by the user that has a start and end date or time.
+     */
     public static class Event extends Task {
         protected String start;
         protected String end;
@@ -267,6 +312,9 @@ class Task {
         }
     }
 
+    /**
+     * Represents a Task created by the user.
+     */
     public static class ToDo extends Task {
 
         public ToDo(String description) {
