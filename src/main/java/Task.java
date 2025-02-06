@@ -2,6 +2,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -16,11 +20,10 @@ class Task {
     public Task(String description) {
         this.description = description;
         this.isDone = false;
-        Task.userTasks.add(this);
         this.type = taskType.TODO;
     }
 
-    public enum taskType {TODO, DEADLINE, EVENT;}
+    public enum taskType {TODO, DEADLINE, EVENT}
 
     public static void initialiseUserTasks () {
         try {
@@ -44,6 +47,8 @@ class Task {
             }
         } catch (FileNotFoundException e) {
             //do nothing
+        } catch (KifException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -85,7 +90,7 @@ class Task {
             throw new RuntimeException(e);
         }
 
-        FileWriter fw = null; // create a FileWriter in append mode
+        FileWriter fw; // create a FileWriter in append mode
         try {
             fw = new FileWriter(FILEPATH, true);
             for (String line : preItems) {
@@ -115,7 +120,7 @@ class Task {
     }
 
     private static void writeTask(Task task) {
-        FileWriter fw = null; // create a FileWriter in append mode
+        FileWriter fw; // create a FileWriter in append mode
         try {
             fw = new FileWriter(FILEPATH, true);
             if (task.type == taskType.TODO) {
@@ -126,9 +131,11 @@ class Task {
                 }
             } else if (task.type == taskType.DEADLINE) {
                 if (task instanceof Deadline deadlineTask) {  // Ensure it's actually a Deadline
-                    fw.write("\n" + deadlineTask.isDone + Task.KEYWORD + deadlineTask.by);
+                    fw.write("\n" + deadlineTask.isDone + Task.KEYWORD +
+                            deadlineTask.by.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                 }
             }
+            Task.userTasks.add(task);
             fw.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -140,7 +147,7 @@ class Task {
         System.out.println("Here are the tasks in your list:");
         int counter = 1;
         for (Task task: userTasks) {
-            System.out.println(Integer.toString(counter) + "." + task);
+            System.out.println(counter + "." + task);
             counter++;
         }
         System.out.println("____________________________________________________________");
@@ -179,17 +186,27 @@ class Task {
 
     public static class Deadline extends Task {
 
-        protected String by;
+        protected LocalDate by;
 
-        public Deadline(String description, String by) {
+        public Deadline(String description, String by) throws KifException {
             super(description);
-            this.by = by;
+            try {
+                this.by = LocalDate.parse(by.trim());
+            } catch (DateTimeParseException e) {
+                String errorMessage =
+                        """
+                        ____________________________________________________________
+                        Kif: Please format "/by" value to yyyy-MM-dd and try again
+                        ____________________________________________________________""";
+                throw new KifException(errorMessage);
+            }
             this.type = taskType.DEADLINE;
         }
 
-        public static void createDeadline(String description) {
+        public static void createDeadline(String description) throws KifException {
             String[] information = description.split("/by");
-            Task deadlineTask = new Deadline(information[0].replace("deadline ", ""), information[1]);
+            Task deadlineTask;
+            deadlineTask = new Deadline(information[0].replace("deadline ", ""), information[1]);
             Task.writeTask(deadlineTask);
             System.out.println("____________________________________________________________");
             System.out.println("Got it. I've added this task:");
@@ -200,7 +217,7 @@ class Task {
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + "(by:" + by + ")";
+            return "[D]" + super.toString() + "(by: " + by.format(DateTimeFormatter.ofPattern("MMM dd yyyy")) + ")";
         }
     }
 

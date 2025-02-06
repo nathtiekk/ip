@@ -28,7 +28,7 @@ public class Kif {
         DEADLINE,
         EVENT,
         TODO,
-        DELETE;
+        DELETE
     }
 
     private static void goodbye() {
@@ -55,7 +55,13 @@ public class Kif {
                 case LIST -> Task.listUserTask();
                 case MARK -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
                 case UNMARK -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
-                case DEADLINE -> Task.Deadline.createDeadline(userMessage);
+                case DEADLINE -> {
+                    try {
+                        Task.Deadline.createDeadline(userMessage);
+                    } catch (KifException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
                 case EVENT -> Task.Event.createEvent(userMessage);
                 case DELETE -> Task.delete(Integer.parseInt(splitMessage[1]));
                 case TODO -> {
