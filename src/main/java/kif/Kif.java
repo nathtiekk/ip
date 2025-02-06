@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * Handles the chatbot's interaction with the user.
+ * Also includes methods to start up, and end the interaction.
+ */
 public class Kif {
 
     private static void introduce() {
