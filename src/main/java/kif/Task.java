@@ -4,32 +4,35 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import java.util.Scanner;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import java.util.ArrayList;
-import java.util.Scanner;
 
 class Task {
     private static final ArrayList<Task> userTasks = new ArrayList<>();
     protected String description;
     protected boolean isDone;
-    private static final String FILEPATH = "tasks.txt";
-    protected taskType type;
+    private static final String FILE_PATH = "tasks.txt";
+    protected TaskType type;
     private static final String KEYWORD = "kifReservedKeyword";
 
     public Task(String description) {
         this.description = description;
         this.isDone = false;
-        this.type = taskType.TODO;
+        this.type = TaskType.TODO;
     }
 
-    public enum taskType {TODO, DEADLINE, EVENT}
+    public enum TaskType {TODO, DEADLINE, EVENT}
 
-    public static void initialiseUserTasks () {
+    public static void initialiseUserTasks() {
         try {
-            File f = new File(FILEPATH); // create a File for the given file path
-            Scanner s = new Scanner(f); // create a Scanner using the File as the source
+            File f = new File(FILE_PATH);
+            Scanner s = new Scanner(f);
             while (s.hasNextLine()) {
                 String line = s.nextLine();
                 String[] description = line.split(KEYWORD);
@@ -54,7 +57,8 @@ class Task {
     }
 
     public String getStatusIcon() {
-        return (isDone ? "X" : " "); // mark done task with X
+        // mark done task with X
+        return (isDone ? "X" : " ");
     }
 
     @Override
@@ -66,18 +70,18 @@ class Task {
         System.out.println("Now you have " + Task.userTasks.size() + " tasks in the list.");
     }
 
-    private static void editTaskTXT (int lineNumber, Kif.UserCommand operation) {
+    private static void editTaskTxt(int lineNumber, Kif.UserCommand operation) {
         ArrayList<String> preItems = new ArrayList<>();
         ArrayList<String> postItems = new ArrayList<>();
-        ArrayList<String> editLine = new ArrayList<>();
+        ArrayList<String> editLines = new ArrayList<>();
         try {
-            File f = new File(FILEPATH); // create a File for the given file path
-            Scanner s = new Scanner(f); // create a Scanner using the File as the source
+            File f = new File(FILE_PATH);
+            Scanner s = new Scanner(f);
             int counter = 1;
             while (s.hasNextLine()) {
                 String line = s.nextLine();
                 if (counter == lineNumber) {
-                    editLine.add(line);
+                    editLines.add(line);
                 }
                 else if (counter < lineNumber) {
                     preItems.add(line);
@@ -91,26 +95,28 @@ class Task {
             throw new RuntimeException(e);
         }
 
-        FileWriter fw; // create a FileWriter in append mode
+        FileWriter fw;
         try {
-            fw = new FileWriter(FILEPATH, true);
+            fw = new FileWriter(FILE_PATH, true);
             for (String line : preItems) {
                 fw.write("\n" + line);
             }
+
+            String newLine = "";
             switch (operation) {
-                case MARK -> {
-                    String newLine = editLine.get(0).replaceFirst("false", "true");
-                    fw.write("\n" + newLine);
-                }
-                case UNMARK -> {
-                    String newLine = editLine.get(0).replaceFirst("true", "false");
-                    fw.write("\n" + newLine);
-                }
-                case DELETE -> {
-                    String newLine = "";
-                    fw.write(newLine);
-                }
+            case MARK:
+                newLine = editLines.get(0).replaceFirst("false", "true");
+                fw.write("\n" + newLine);
+                break;
+            case UNMARK:
+                newLine = editLines.get(0).replaceFirst("true", "false");
+                fw.write("\n" + newLine);
+                break;
+            case DELETE:
+                fw.write(newLine);
+                break;
             }
+
             for (String line : postItems) {
                 fw.write("\n" + line);
             }
@@ -121,17 +127,18 @@ class Task {
     }
 
     private static void writeTask(Task task) {
-        FileWriter fw; // create a FileWriter in append mode
+        FileWriter fw;
         try {
-            fw = new FileWriter(FILEPATH, true);
-            if (task.type == taskType.TODO) {
+            fw = new FileWriter(FILE_PATH, true);
+            if (task.type == TaskType.TODO) {
                 fw.write("\n" + task.isDone + Task.KEYWORD);
-            } else if (task.type == taskType.EVENT) {
-                if (task instanceof Event eventTask) {  // Ensure it's actually a Deadline
-                    fw.write("\n" + eventTask.isDone + Task.KEYWORD + eventTask.start + Task.KEYWORD + eventTask.end);
+            } else if (task.type == TaskType.EVENT) {
+                if (task instanceof Event eventTask) {
+                    fw.write("\n" + eventTask.isDone + Task.KEYWORD + eventTask.start
+                            + Task.KEYWORD + eventTask.end);
                 }
-            } else if (task.type == taskType.DEADLINE) {
-                if (task instanceof Deadline deadlineTask) {  // Ensure it's actually a Deadline
+            } else if (task.type == TaskType.DEADLINE) {
+                if (task instanceof Deadline deadlineTask) {
                     fw.write("\n" + deadlineTask.isDone + Task.KEYWORD +
                             deadlineTask.by.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                 }
@@ -157,7 +164,8 @@ class Task {
     public static void markUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = true;
-        editTaskTXT(key, Kif.UserCommand.MARK);
+        editTaskTxt(key, Kif.UserCommand.MARK);
+
         System.out.println("____________________________________________________________");
         System.out.println("Nice! I've marked this task as done:");
         System.out.println(currentTask);
@@ -167,7 +175,8 @@ class Task {
     public static void unmarkUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = false;
-        editTaskTXT(key, Kif.UserCommand.UNMARK);
+        editTaskTxt(key, Kif.UserCommand.UNMARK);
+
         System.out.println("____________________________________________________________");
         System.out.println("OK, I've marked this task as not done yet:");
         System.out.println(currentTask);
@@ -177,7 +186,8 @@ class Task {
     public static void delete(int key) {
         Task currentTask = userTasks.get(key - 1);
         userTasks.remove(key - 1);
-        editTaskTXT(key, Kif.UserCommand.DELETE);
+        editTaskTxt(key, Kif.UserCommand.DELETE);
+
         System.out.println("____________________________________________________________");
         System.out.println("Noted. I've removed this task:");
         System.out.println(currentTask);
@@ -186,11 +196,11 @@ class Task {
     }
 
     public static class Deadline extends Task {
-
         protected LocalDate by;
 
         public Deadline(String description, String by) throws KifException {
             super(description);
+
             try {
                 this.by = LocalDate.parse(by.trim());
             } catch (DateTimeParseException e) {
@@ -199,16 +209,19 @@ class Task {
                         ____________________________________________________________
                         Kif: Please format "/by" value to yyyy-MM-dd and try again
                         ____________________________________________________________""";
+
                 throw new KifException(errorMessage);
             }
-            this.type = taskType.DEADLINE;
+            this.type = TaskType.DEADLINE;
         }
 
         public static void createDeadline(String description) throws KifException {
             String[] information = description.split("/by");
             Task deadlineTask;
-            deadlineTask = new Deadline(information[0].replace("deadline ", ""), information[1]);
+            deadlineTask = new Deadline(information[0].replace("deadline ", ""),
+                    information[1]);
             Task.writeTask(deadlineTask);
+
             System.out.println("____________________________________________________________");
             System.out.println("Got it. I've added this task:");
             System.out.println(deadlineTask);
@@ -218,12 +231,12 @@ class Task {
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + "(by: " + by.format(DateTimeFormatter.ofPattern("MMM dd yyyy")) + ")";
+            return "[D]" + super.toString()
+                    + "(by: " + by.format(DateTimeFormatter.ofPattern("MMM dd yyyy")) + ")";
         }
     }
 
     public static class Event extends Task {
-
         protected String start;
         protected String end;
 
@@ -231,13 +244,15 @@ class Task {
             super(description);
             this.start = start;
             this.end = end;
-            this.type = taskType.EVENT;
+            this.type = TaskType.EVENT;
         }
 
         public static void createEvent(String description) {
             String[] information = description.split("/from | /to");
-            Task eventTask = new Event(information[0].replace("event ", ""), information[1], information[2]);
+            Task eventTask = new Event(information[0].replace("event ", ""),
+                    information[1], information[2]);
             Task.writeTask(eventTask);
+
             System.out.println("____________________________________________________________");
             System.out.println("Got it. I've added this task:");
             System.out.println(eventTask);
@@ -247,7 +262,8 @@ class Task {
 
         @Override
         public String toString() {
-            return "[E]" + super.toString() + "(from: " + start + " to:" + end + ")";
+            return "[E]" + super.toString()
+                    + "(from: " + start + " to:" + end + ")";
         }
     }
 
@@ -255,21 +271,23 @@ class Task {
 
         public ToDo(String description) {
             super(description);
-            this.type = taskType.TODO;
+            this.type = TaskType.TODO;
         }
 
         public static void createToDo(String description) throws KifException {
             Task toDoTask = new ToDo(extractDetails(description));
+            Task.writeTask(toDoTask);
+
             System.out.println("____________________________________________________________");
             System.out.println("Got it. I've added this task:");
-            Task.writeTask(toDoTask);
             System.out.println(toDoTask);
             Task.printTotalTasks();
             System.out.println("____________________________________________________________");
         }
 
-        private static String extractDetails (String description) throws KifException {
+        private static String extractDetails(String description) throws KifException {
             String cleanInput = description.replace("todo", "");
+
             if(cleanInput.trim().isEmpty()) {
                 throw new KifException(
                         """

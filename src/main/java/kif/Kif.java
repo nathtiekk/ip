@@ -47,39 +47,54 @@ public class Kif {
     }
 
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         bootUp();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String userMessage = reader.readLine();
         String[] splitMessage = userMessage.split(" ");
-        while(!isTerminate(splitMessage[0])) {
+
+        while (!isTerminate(splitMessage[0])) {
             UserCommand command = UserCommand.valueOf(splitMessage[0].toUpperCase());
             switch (command) {
-                case LIST -> Task.listUserTask();
-                case MARK -> Task.markUserTask(Integer.parseInt(splitMessage[1]));
-                case UNMARK -> Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
-                case DEADLINE -> {
-                    try {
-                        Task.Deadline.createDeadline(userMessage);
-                    } catch (KifException e) {
-                        System.out.println(e.getMessage());
-                    }
+            case LIST:
+                Task.listUserTask();
+                break;
+            case MARK:
+                Task.markUserTask(Integer.parseInt(splitMessage[1]));
+                break;
+            case UNMARK:
+                Task.unmarkUserTask(Integer.parseInt(splitMessage[1]));
+                break;
+            case DEADLINE:
+                try {
+                    Task.Deadline.createDeadline(userMessage);
+                } catch (KifException e) {
+                    System.out.println(e.getMessage());
                 }
-                case EVENT -> Task.Event.createEvent(userMessage);
-                case DELETE -> Task.delete(Integer.parseInt(splitMessage[1]));
-                case TODO -> {
-                    try {
-                        Task.ToDo.createToDo(userMessage);
-                    } catch (KifException e) {
-                        System.out.println(e.getMessage());
-                    }
+                break;
+            case EVENT:
+                Task.Event.createEvent(userMessage);
+                break;
+            case DELETE:
+                Task.delete(Integer.parseInt(splitMessage[1]));
+                break;
+            case TODO:
+                try {
+                    Task.ToDo.createToDo(userMessage);
+                } catch (KifException e) {
+                    System.out.println(e.getMessage());
                 }
-                default -> System.out.println(
-                                    """
-                                    ____________________________________________________________
-                                    OOPS!!! I'm sorry, but I don't know what that means :-(
-                                    ____________________________________________________________"""
+                break;
+            default:
+                System.out.println(
+                    """
+                    ____________________________________________________________
+                    OOPS!!! I'm sorry, but I don't know what that means :-(
+                    ____________________________________________________________"""
                 );
+                break;
             }
+
             userMessage = reader.readLine();
             splitMessage = userMessage.split(" ");
         }
