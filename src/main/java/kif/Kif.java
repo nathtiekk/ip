@@ -10,20 +10,9 @@ import java.io.InputStreamReader;
  */
 public class Kif {
 
-    private static void introduce() {
-        String introduce =
-                """
-                ____________________________________________________________
-                Hello! I'm Kif
-                What can I do for you?
-                ____________________________________________________________
-                """;
-        System.out.println(introduce);
-    }
-
     private static void bootUp() {
-        Task.initialiseUserTasks();
-        introduce();
+        Storage.initialiseUserTasks();
+        Ui.introduction();
         Task.listUserTask();
     }
 
@@ -37,25 +26,16 @@ public class Kif {
         DELETE
     }
 
-    private static void goodbye() {
-        String goodbye =
-                """
-                ____________________________________________________________
-                Kif: Bye. Hope to see you again soon!
-                ____________________________________________________________""";
-        System.out.println(goodbye);
-    }
-
     private static boolean isTerminate(String code) {
         return code.equals("bye");
     }
 
-    public static void main(String[] args) throws IOException {
+    private static void run() throws IOException {
         bootUp();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String userMessage = reader.readLine();
-        String[] splitMessage = userMessage.split(" ");
+        String[] splitMessage = Parser.parseUserInput(userMessage);
 
         while (!isTerminate(splitMessage[0])) {
             UserCommand command = UserCommand.valueOf(splitMessage[0].toUpperCase());
@@ -91,17 +71,21 @@ public class Kif {
                 break;
             default:
                 System.out.println(
-                    """
-                    ____________________________________________________________
-                    OOPS!!! I'm sorry, but I don't know what that means :-(
-                    ____________________________________________________________"""
+                        """
+                        ____________________________________________________________
+                        OOPS!!! I'm sorry, but I don't know what that means :-(
+                        ____________________________________________________________"""
                 );
                 break;
             }
 
             userMessage = reader.readLine();
-            splitMessage = userMessage.split(" ");
+            splitMessage = Parser.parseUserInput(userMessage);
         }
-        goodbye();
+        Ui.goodbye();
+    }
+
+    public static void main(String[] args) throws IOException {
+        Kif.run();
     }
 }
