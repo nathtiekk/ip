@@ -58,8 +58,7 @@ public class Storage {
                 }
                 else if (counter < lineNumber) {
                     preItems.add(line);
-                }
-                else {
+                } else {
                     postItems.add(line);
                 }
                 counter++;
