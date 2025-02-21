@@ -43,22 +43,25 @@ class Task {
     /**
      * Prints the number of task the user currently has thus far.
      */
-    public static void printTotalTasks() {
-        System.out.println("Now you have " + Task.userTasks.size() + " tasks in the list.");
+    public static String printTotalTasks() {
+        return "Now you have " + Task.userTasks.size() + " tasks in the list.";
     }
 
     /**
      * Numbers and list all the tasks a user has.
      */
-    public static void listUserTask() {
-        System.out.println("____________________________________________________________");
-        System.out.println("Here are the tasks in your list:");
+    public static String listUserTask() {
+        StringBuilder response = new StringBuilder();
+        response.append("____________________________________________________________")
+                .append(System.lineSeparator());
+        response.append("Here are the tasks in your list:").append(System.lineSeparator());;
         int counter = 1;
         for (Task task: userTasks) {
-            System.out.println(counter + "." + task);
+            response.append(counter).append(".").append(task).append(System.lineSeparator());;
             counter++;
         }
-        System.out.println("____________________________________________________________");
+        response.append("____________________________________________________________");
+        return response.toString();
     }
 
     /**
@@ -67,15 +70,16 @@ class Task {
      *
      * @param key The position of the Task in the list from the user's perspective.
      */
-    public static void markUserTask(int key) {
+    public static String markUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = true;
         Storage.editTaskTxt(key, Kif.UserCommand.MARK);
 
-        System.out.println("____________________________________________________________");
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println(currentTask);
-        System.out.println("____________________________________________________________");
+        return "____________________________________________________________" +
+                System.lineSeparator() +
+                "Nice! I've marked this task as done:" + System.lineSeparator() +
+                currentTask + System.lineSeparator() +
+                "____________________________________________________________";
     }
 
     /**
@@ -84,15 +88,16 @@ class Task {
      *
      * @param key The position of the Task in the list from the user's perspective.
      */
-    public static void unmarkUserTask(int key) {
+    public static String unmarkUserTask(int key) {
         Task currentTask = userTasks.get(key - 1);
         currentTask.isDone = false;
         Storage.editTaskTxt(key, Kif.UserCommand.UNMARK);
 
-        System.out.println("____________________________________________________________");
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println(currentTask);
-        System.out.println("____________________________________________________________");
+        return "____________________________________________________________" +
+                System.lineSeparator() +
+                "OK, I've marked this task as not done yet:" + System.lineSeparator() +
+                currentTask + System.lineSeparator() +
+                "____________________________________________________________";
     }
 
     /**
@@ -101,16 +106,17 @@ class Task {
      *
      * @param key The position of the Task in the list from the user's perspective.
      */
-    public static void delete(int key) {
+    public static String delete(int key) {
         Task currentTask = userTasks.get(key - 1);
         userTasks.remove(key - 1);
         Storage.editTaskTxt(key, Kif.UserCommand.DELETE);
 
-        System.out.println("____________________________________________________________");
-        System.out.println("Noted. I've removed this task:");
-        System.out.println(currentTask);
-        Task.printTotalTasks();
-        System.out.println("____________________________________________________________");
+        return "____________________________________________________________" +
+                System.lineSeparator() +
+                "Noted. I've removed this task:" + System.lineSeparator() +
+                currentTask + System.lineSeparator() + Task.printTotalTasks() +
+                System.lineSeparator() +
+                "____________________________________________________________";
     }
 
     /**
@@ -126,17 +132,18 @@ class Task {
             this.type = TaskType.DEADLINE;
         }
 
-        public static void createDeadline(String description) throws KifException {
+        public static String createDeadline(String description) throws KifException {
             String[] information = Parser.parseDeadlineTask(description);
             Task deadlineTask;
             deadlineTask = new Deadline(information[0], information[1]);
             Storage.writeTask(deadlineTask);
 
-            System.out.println("____________________________________________________________");
-            System.out.println("Got it. I've added this task:");
-            System.out.println(deadlineTask);
-            Task.printTotalTasks();
-            System.out.println("____________________________________________________________");
+            return "____________________________________________________________" +
+                    System.lineSeparator() +
+                    "Got it. I've added this task:" + System.lineSeparator() +
+                    deadlineTask + System.lineSeparator() + Task.printTotalTasks() +
+                    System.lineSeparator() +
+                    "____________________________________________________________";
         }
 
         @Override
@@ -160,16 +167,17 @@ class Task {
             this.type = TaskType.EVENT;
         }
 
-        public static void createEvent(String description) {
+        public static String createEvent(String description) {
             String[] information = Parser.parseEventTask(description);
             Task eventTask = new Event(information[0], information[1], information[2]);
             Storage.writeTask(eventTask);
 
-            System.out.println("____________________________________________________________");
-            System.out.println("Got it. I've added this task:");
-            System.out.println(eventTask);
-            Task.printTotalTasks();
-            System.out.println("____________________________________________________________");
+            return "____________________________________________________________" +
+                    System.lineSeparator() +
+                    "Got it. I've added this task:" + System.lineSeparator() +
+                    eventTask + System.lineSeparator() + Task.printTotalTasks() +
+                    System.lineSeparator() +
+                    "____________________________________________________________";
         }
 
         @Override
@@ -189,15 +197,16 @@ class Task {
             this.type = TaskType.TODO;
         }
 
-        public static void createToDo(String description) throws KifException {
+        public static String createToDo(String description) throws KifException {
             Task toDoTask = new ToDo(Parser.parseToDoTask(description));
             Storage.writeTask(toDoTask);
 
-            System.out.println("____________________________________________________________");
-            System.out.println("Got it. I've added this task:");
-            System.out.println(toDoTask);
-            Task.printTotalTasks();
-            System.out.println("____________________________________________________________");
+            return "____________________________________________________________" +
+                    System.lineSeparator() +
+                    "Got it. I've added this task:" + System.lineSeparator() +
+                    toDoTask + System.lineSeparator() + Task.printTotalTasks() +
+                    System.lineSeparator() +
+                    "____________________________________________________________";
         }
 
         @Override
