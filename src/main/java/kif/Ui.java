@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -41,24 +42,24 @@ public class Ui extends Application {
         }
     }
 
-    public static void introduction() {
-        String introduce =
-                """
-                ____________________________________________________________
-                Hello! I'm Kif
-                What can I do for you?
-                ____________________________________________________________
-                """;
-        System.out.println(introduce);
+    public static String introduction() {
+        return """
+               ____________________________________________________________
+               Hello! I'm Kif
+               What can I do for you?
+               ____________________________________________________________
+               """;
     }
 
-    public static void goodbye() {
-        String goodbye =
-                """
-                ____________________________________________________________
-                Kif: Bye. Hope to see you again soon!
-                ____________________________________________________________""";
-        System.out.println(goodbye);
+    public static void closeGui() {
+        Platform.exit();
+    }
+
+    public static String goodbye() {
+        return """
+               ____________________________________________________________
+               Kif: Bye. Hope to see you again soon!
+               ____________________________________________________________""";
     }
 
     /**

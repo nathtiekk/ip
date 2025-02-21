@@ -26,14 +26,17 @@ public class Storage {
                 if (description.length == 2) {
                     Task t = new Task.ToDo(description[1]);
                     t.isDone = Boolean.parseBoolean(description[0].trim());
+                    Task.addTaskToList(t);
                 }
                 else if (description.length == 4) {
                     Task t = new Task.Event(description[1], description[2], description[3]);
                     t.isDone = Boolean.parseBoolean(description[0].trim());
+                    Task.addTaskToList(t);
                 }
                 else if (description.length == 3) {
                     Task t = new Task.Deadline(description[1], description[2]);
                     t.isDone = Boolean.parseBoolean(description[0].trim());
+                    Task.addTaskToList(t);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -69,7 +72,7 @@ public class Storage {
 
         FileWriter fw;
         try {
-            fw = new FileWriter(FILE_PATH, true);
+            fw = new FileWriter(FILE_PATH, false);
             for (String line : preItems) {
                 fw.write("\n" + line);
             }
@@ -104,16 +107,17 @@ public class Storage {
         try {
             fw = new FileWriter(FILE_PATH, true);
             if (task.type == Task.TaskType.TODO) {
-                fw.write("\n" + task.isDone + KEYWORD);
+                fw.write("\n" + task.isDone + KEYWORD + task.description);
             } else if (task.type == Task.TaskType.EVENT) {
                 if (task instanceof Task.Event eventTask) {
-                    fw.write("\n" + eventTask.isDone + KEYWORD + eventTask.start
+                    fw.write("\n" + eventTask.isDone + KEYWORD + task.description
+                            + KEYWORD + eventTask.start
                             + KEYWORD + eventTask.end);
                 }
             } else if (task.type == Task.TaskType.DEADLINE) {
                 if (task instanceof Task.Deadline deadlineTask) {
-                    fw.write("\n" + deadlineTask.isDone + KEYWORD +
-                            Parser.parseDateToString(deadlineTask.by));
+                    fw.write("\n" + deadlineTask.isDone + KEYWORD + task.description
+                            + KEYWORD + deadlineTask.by);
                 }
             }
             Task.addTaskToList(task);

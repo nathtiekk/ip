@@ -23,15 +23,29 @@ public class MainWindow extends AnchorPane {
 
     private Kif kif;
 
-    private Image userImage = new Image(this.getClass().getResourceAsStream(
-            "/images/WhatsApp Image 2025-02-19 at 11.27.22.jpeg"));
     private Image kifImage = new Image(this.getClass().getResourceAsStream(
+            "/images/WhatsApp Image 2025-02-19 at 11.27.22.jpeg"));
+    private Image userImage = new Image(this.getClass().getResourceAsStream(
             "/images/WhatsApp Image 2025-02-19 at 11.27.24.jpeg"));
 
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        showWelcomeMsg();
+        showExistingTasks();
+    }
 
+    private void showExistingTasks() {
+        Storage.initialiseUserTasks();
+        dialogContainer.getChildren().addAll(
+                Ui.DialogBox.getKifDialog(Task.listUserTask(), kifImage)
+        );
+    }
+
+    public void showWelcomeMsg() {
+        dialogContainer.getChildren().addAll(
+                Ui.DialogBox.getKifDialog(Ui.introduction(), kifImage)
+        );
     }
 
     /** Injects the Kif instance */
@@ -46,7 +60,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String userText = userInput.getText();
-        String kifText = userInput.getText();
+        String kifText = Kif.getResponse(userText);
         dialogContainer.getChildren().addAll(
                 Ui.DialogBox.getUserDialog(userText, userImage),
                 Ui.DialogBox.getKifDialog(kifText, kifImage)
