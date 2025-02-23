@@ -62,6 +62,13 @@ public class Ui extends Application {
                ____________________________________________________________""";
     }
 
+    public static String cannotUndoMsg() {
+        return """
+               ____________________________________________________________
+               Kif: No command to undo.
+               ____________________________________________________________""";
+    }
+
     /**
      * Represents a dialog box consisting of an ImageView to represent the speaker's face
      * and a label containing text from the speaker.
