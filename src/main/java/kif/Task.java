@@ -25,6 +25,15 @@ class Task {
         userTasks.add(task);
     }
 
+    public static String createTaskMsg(Task t) {
+        return "____________________________________________________________" +
+                System.lineSeparator() +
+                "Got it. I've added this task:" + System.lineSeparator() +
+                t + System.lineSeparator() + Task.printTotalTasks() +
+                System.lineSeparator() +
+                "____________________________________________________________";
+    }
+
     /**
      * Returns "X" if the Task is done, or " " otherwise.
      *
@@ -82,6 +91,22 @@ class Task {
                 "____________________________________________________________";
     }
 
+    public static Task getTask(int index) {
+        return userTasks.get(index - 1);
+    }
+
+    public static int getTaskIndex(Task t) {
+        int index = 1;
+        for (Task task : userTasks) {
+            if (task.equals(t)) {
+                return index;
+            }
+            index++;
+        }
+        //not found
+        return -1;
+    }
+
     /**
      * Unmarks the task specified by the user as undone
      * before showing a success message and the details of the unmarked task.
@@ -132,18 +157,18 @@ class Task {
             this.type = TaskType.DEADLINE;
         }
 
-        public static String createDeadline(String description) throws KifException {
+        public static Deadline createDeadline(Deadline task) throws KifException {
+            Deadline deadlineTask = new Deadline(task.description, String.valueOf(task.by));
+            Storage.writeTask(deadlineTask);
+            return deadlineTask;
+        }
+
+        public static Deadline createDeadline(String description) throws KifException {
             String[] information = Parser.parseDeadlineTask(description);
-            Task deadlineTask;
+            Deadline deadlineTask;
             deadlineTask = new Deadline(information[0], information[1]);
             Storage.writeTask(deadlineTask);
-
-            return "____________________________________________________________" +
-                    System.lineSeparator() +
-                    "Got it. I've added this task:" + System.lineSeparator() +
-                    deadlineTask + System.lineSeparator() + Task.printTotalTasks() +
-                    System.lineSeparator() +
-                    "____________________________________________________________";
+            return deadlineTask;
         }
 
         @Override
@@ -167,17 +192,17 @@ class Task {
             this.type = TaskType.EVENT;
         }
 
-        public static String createEvent(String description) {
-            String[] information = Parser.parseEventTask(description);
-            Task eventTask = new Event(information[0], information[1], information[2]);
+        public static Event createEvent(Event task) {
+            Event eventTask = new Event(task.description, task.start, task.end);
             Storage.writeTask(eventTask);
+            return eventTask;
+        }
 
-            return "____________________________________________________________" +
-                    System.lineSeparator() +
-                    "Got it. I've added this task:" + System.lineSeparator() +
-                    eventTask + System.lineSeparator() + Task.printTotalTasks() +
-                    System.lineSeparator() +
-                    "____________________________________________________________";
+        public static Event createEvent(String description) {
+            String[] information = Parser.parseEventTask(description);
+            Event eventTask = new Event(information[0], information[1], information[2]);
+            Storage.writeTask(eventTask);
+            return eventTask;
         }
 
         @Override
@@ -197,16 +222,16 @@ class Task {
             this.type = TaskType.TODO;
         }
 
-        public static String createToDo(String description) throws KifException {
-            Task toDoTask = new ToDo(Parser.parseToDoTask(description));
+        public static ToDo createToDo(ToDo task) {
+            ToDo toDoTask = new ToDo(task.description);
             Storage.writeTask(toDoTask);
+            return toDoTask;
+        }
 
-            return "____________________________________________________________" +
-                    System.lineSeparator() +
-                    "Got it. I've added this task:" + System.lineSeparator() +
-                    toDoTask + System.lineSeparator() + Task.printTotalTasks() +
-                    System.lineSeparator() +
-                    "____________________________________________________________";
+        public static ToDo createToDo(String description) throws KifException {
+            ToDo toDoTask = new ToDo(Parser.parseToDoTask(description));
+            Storage.writeTask(toDoTask);
+            return toDoTask;
         }
 
         @Override

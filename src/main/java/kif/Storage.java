@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Storage {
     private static final String FILE_PATH = "tasks.txt";
-    private static final String KEYWORD = "kifReservedKeyword";
+    public static final String KEYWORD = "kifReservedKeyword";
     /**
      * Loads up all the tasks saved previously by the user
      * and catches FileNotFoundException, and KifException when file is not found,
@@ -74,18 +74,18 @@ public class Storage {
         try {
             fw = new FileWriter(FILE_PATH, false);
             for (String line : preItems) {
-                fw.write("\n" + line);
+                fw.write(line + "\n");
             }
 
             String newLine = "";
             switch (operation) {
             case MARK:
                 newLine = editLines.get(0).replaceFirst("false", "true");
-                fw.write("\n" + newLine);
+                fw.write(newLine + "\n");
                 break;
             case UNMARK:
                 newLine = editLines.get(0).replaceFirst("true", "false");
-                fw.write("\n" + newLine);
+                fw.write(newLine + "\n");
                 break;
             case DELETE:
                 fw.write(newLine);
@@ -93,7 +93,7 @@ public class Storage {
             }
 
             for (String line : postItems) {
-                fw.write("\n" + line);
+                fw.write(line + "\n");
             }
             fw.close();
         } catch (IOException e) {
@@ -107,17 +107,17 @@ public class Storage {
         try {
             fw = new FileWriter(FILE_PATH, true);
             if (task.type == Task.TaskType.TODO) {
-                fw.write("\n" + task.isDone + KEYWORD + task.description);
+                fw.write(task.isDone + KEYWORD + task.description + "\n");
             } else if (task.type == Task.TaskType.EVENT) {
                 if (task instanceof Task.Event eventTask) {
-                    fw.write("\n" + eventTask.isDone + KEYWORD + task.description
+                    fw.write(eventTask.isDone + KEYWORD + task.description
                             + KEYWORD + eventTask.start
-                            + KEYWORD + eventTask.end);
+                            + KEYWORD + eventTask.end + "\n");
                 }
             } else if (task.type == Task.TaskType.DEADLINE) {
                 if (task instanceof Task.Deadline deadlineTask) {
-                    fw.write("\n" + deadlineTask.isDone + KEYWORD + task.description
-                            + KEYWORD + deadlineTask.by);
+                    fw.write(deadlineTask.isDone + KEYWORD + task.description
+                            + KEYWORD + deadlineTask.by + "\n");
                 }
             }
             Task.addTaskToList(task);
