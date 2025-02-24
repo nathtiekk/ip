@@ -33,6 +33,7 @@ public class Ui extends Application {
             FXMLLoader fxmlLoader = new FXMLLoader(Ui.class.getResource("/view/MainWindow.fxml"));
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
+            stage.setTitle("Kif");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -65,7 +66,7 @@ public class Ui extends Application {
     }
 
     public static String getUnknownCommandMessage() {
-        return "I'm sorry, but I don't understand that command. Please try again!";
+        return formatMessage("I'm sorry, but I don't understand that command. Please try again!");
     }
 
     /**
