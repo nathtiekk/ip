@@ -21,114 +21,109 @@ public class Kif {
         UNDO,
     }
 
-    private static String undoPrevCommand(UserCommand previousCommand, Task previousTask)
-            throws KifException {
-        switch (previousCommand) {
-        case MARK:
-            return Task.unmarkUserTask(Task.getTaskIndex(previousTask));
-            //Fallthrough
-        case UNMARK:
-            return Task.markUserTask(Task.getTaskIndex(previousTask));
-            //Fallthrough
-        case DEADLINE, TODO, EVENT:
-            return Task.delete(Task.getTaskIndex(previousTask));
-            //Fallthrough
-        case DELETE:
-            if (previousTask instanceof Task.Deadline) {
-                Task.Deadline task = Task.Deadline.createDeadline((Task.Deadline) previousTask);
-                if (previousTask.isDone) {
-                    Task.markUserTask(Task.getTaskIndex(task));
-                }
-                return Task.createTaskMsg(task);
-            } else if (previousTask instanceof Task.ToDo) {
-                Task.ToDo task = Task.ToDo.createToDo((Task.ToDo) previousTask);
-                if (previousTask.isDone) {
-                    Task.markUserTask(Task.getTaskIndex(task));
-                }
-                return Task.createTaskMsg(task);
-            } else if (previousTask instanceof Task.Event) {
-                Task.Event task = Task.Event.createEvent((Task.Event) previousTask);
-                if (previousTask.isDone) {
-                    Task.markUserTask(Task.getTaskIndex(task));
-                }
-                return Task.createTaskMsg(task);
-            }
-            break;
+    private static String undoPrevCommand() throws KifException {
+        if (previousCommand == null || previousTask == null) {
+            return Ui.getCannotUndoMessage();
         }
-        return Ui.cannotUndoMsg();
+
+        return switch (previousCommand) {
+            case MARK -> Task.unmarkTask(Task.getTaskIndex(previousTask));
+            case UNMARK -> Task.markTask(Task.getTaskIndex(previousTask));
+            case DEADLINE, TODO, EVENT -> Task.deleteTask(Task.getTaskIndex(previousTask));
+            case DELETE -> restoreDeletedTask();
+            default -> Ui.getCannotUndoMessage();
+        };
+    }
+
+    private static String restoreDeletedTask() throws KifException {
+        Task restoredTask;
+
+        if (previousTask instanceof Task.Deadline) {
+            restoredTask = Task.Deadline.create((Task.Deadline) previousTask);
+        } else if (previousTask instanceof Task.ToDo) {
+            restoredTask = Task.ToDo.create((Task.ToDo) previousTask);
+        } else if (previousTask instanceof Task.Event) {
+            restoredTask = Task.Event.create((Task.Event) previousTask);
+        } else {
+            return Ui.getCannotUndoMessage();
+        }
+
+        if (previousTask.isDone) {
+            Task.markTask(Task.getTaskIndex(restoredTask));
+        }
+
+        return Task.createTaskMsg(restoredTask);
     }
 
     public static String getResponse(String userMessage) {
         StringBuilder response = new StringBuilder();
-        String[] splitMessage = Parser.parseUserInput(userMessage);
+        String[] splitMessage = Parser.splitUserInput(userMessage);
 
-        UserCommand command = UserCommand.valueOf(splitMessage[0].toUpperCase());
-        switch (command) {
-        case LIST:
-            response.append(Task.listUserTask());
-            previousCommand = UserCommand.LIST;
-            break;
-        case MARK:
-            response.append(Task.markUserTask(Integer.parseInt(splitMessage[1])));
-            previousCommand = UserCommand.MARK;
-            previousTask = Task.getTask(Integer.parseInt(splitMessage[1]));
-            break;
-        case UNMARK:
-            response.append(Task.unmarkUserTask(Integer.parseInt(splitMessage[1])));
-            previousCommand = UserCommand.UNMARK;
-            previousTask = Task.getTask(Integer.parseInt(splitMessage[1]));
-            break;
-        case DEADLINE:
-            try {
-                Task.Deadline deadLineTask = Task.Deadline.createDeadline(userMessage);
-                response.append(Task.createTaskMsg(deadLineTask));
-                previousTask = deadLineTask;
-                previousCommand = UserCommand.DEADLINE;
-            } catch (KifException e) {
-                response.append(e.getMessage());
-            }
-            break;
-        case EVENT:
-            Task.Event eventTask = Task.Event.createEvent(userMessage);
-            response.append(Task.createTaskMsg(eventTask));
-            previousTask = eventTask;
-            previousCommand = UserCommand.EVENT;
-            break;
-        case DELETE:
-            previousTask = Task.getTask(Integer.parseInt(splitMessage[1]));
-            response.append(Task.delete(Integer.parseInt(splitMessage[1])));
-            previousCommand = UserCommand.DELETE;
-            break;
-        case TODO:
-            try {
-                Task.ToDo toDoTask = Task.ToDo.createToDo(userMessage);
-                response.append(Task.createTaskMsg(toDoTask));
-                previousTask = toDoTask;
-                previousCommand = UserCommand.TODO;
-            } catch (KifException e) {
-                response.append(e.getMessage());
-            }
-            break;
-        case BYE:
-            response.append(Ui.goodbye());
-            Ui.closeGui();
-            break;
-        case UNDO:
-            try {
-                response.append(undoPrevCommand(previousCommand, previousTask));
-            } catch (KifException e) {
-                response.append(e.getMessage());
-            }
-            break;
-        default:
-            response.append(
-                    """
-                    ____________________________________________________________
-                    OOPS!!! I'm sorry, but I don't know what that means :-(
-                    ____________________________________________________________"""
-            );
-            break;
+        try {
+            UserCommand command = UserCommand.valueOf(splitMessage[0].toUpperCase());
+            response.append(handleCommand(command, splitMessage, userMessage));
+        } catch (IllegalArgumentException | KifException e) {
+            response.append(Ui.getUnknownCommandMessage());
         }
         return response.toString();
+    }
+
+    private static String handleCommand(UserCommand command, String[] splitMessage, String userMessage) throws KifException {
+        if (command == UserCommand.LIST) {
+            previousCommand = command;
+            previousTask = null;
+        }
+
+        return switch (command) {
+            case LIST -> Task.listUserTask();
+            case MARK -> updateTaskStatus(Integer.parseInt(splitMessage[1]), true);
+            case UNMARK -> updateTaskStatus(Integer.parseInt(splitMessage[1]), false);
+            case DEADLINE -> createTask(Task.Deadline.create(userMessage));
+            case EVENT -> createTask(Task.Event.create(userMessage));
+            case TODO -> createTask(Task.ToDo.create(userMessage));
+            case DELETE -> deleteTask(Integer.parseInt(splitMessage[1]));
+            case BYE -> exitApplication();
+            case UNDO -> undo();
+        };
+    }
+
+    private static String undo() throws KifException {
+        String result = undoPrevCommand();
+        previousCommand = UserCommand.UNDO;
+        previousTask = null;
+        return result;
+    }
+
+    private static String updateTaskStatus(int index, boolean isMarking) {
+        previousTask = Task.getTask(index);
+        previousCommand = isMarking ? UserCommand.MARK : UserCommand.UNMARK;
+        return isMarking ? Task.markTask(index) : Task.unmarkTask(index);
+    }
+
+    private static String createTask(Task task) {
+        previousTask = task;
+        previousCommand = determineTaskCommand(task);
+        return Task.createTaskMsg(task);
+    }
+
+    private static UserCommand determineTaskCommand(Task task) {
+        if (task instanceof Task.Deadline) {
+            return UserCommand.DEADLINE;
+        } else if (task instanceof Task.Event) {
+            return UserCommand.EVENT;
+        } else {
+            return UserCommand.TODO;
+        }
+    }
+
+    private static String deleteTask(int index) {
+        previousTask = Task.getTask(index);
+        previousCommand = UserCommand.DELETE;
+        return Task.deleteTask(index);
+    }
+
+    private static String exitApplication() {
+        Ui.closeGui();
+        return Ui.getGoodbyeMessage();
     }
 }

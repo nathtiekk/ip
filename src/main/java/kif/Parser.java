@@ -6,53 +6,85 @@ import java.time.format.DateTimeParseException;
 
 public class Parser {
 
+    private static final String DATE_FORMAT_ERROR =
+            """
+            ____________________________________________________________
+            Kif: Please format "/by" value to yyyy-MM-dd and try again
+            ____________________________________________________________""";
+
+    private static final String EMPTY_TODO_ERROR =
+            """
+            ____________________________________________________________
+            OOPS!!! The description of a todo cannot be empty.
+            ____________________________________________________________""";
+
+    private static final DateTimeFormatter OUTPUT_DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd yyyy");
+
+    /**
+     * Parses a date string in "yyyy-MM-dd" format to a LocalDate object.
+     * @param inputDate The date string to parse.
+     * @return The parsed LocalDate object.
+     * @throws KifException If the input format is invalid.
+     */
     public static LocalDate parseDate(String inputDate) throws KifException {
-        LocalDate deadline;
         try {
-            deadline = LocalDate.parse(inputDate.trim());
+            return LocalDate.parse(inputDate.trim());
         } catch (DateTimeParseException e) {
-            String errorMessage =
-                    """
-                            ____________________________________________________________
-                            Kif: Please format "/by" value to yyyy-MM-dd and try again
-                            ____________________________________________________________""";
-
-            throw new KifException(errorMessage);
+            throw new KifException(DATE_FORMAT_ERROR);
         }
-        return deadline;
     }
 
-    public static String[] parseUserInput(String input) {
-        return input.split(" ");
+    /**
+     * Splits user input into individual words.
+     * @param input The user input string.
+     * @return An array of words from the input.
+     */
+    public static String[] splitUserInput(String input) {
+        return input.trim().split("\\s+");
     }
 
-    public static String parseDateToString(LocalDate date) {
-        return date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
+    /**
+     * Converts a LocalDate object to a formatted string (e.g., "Jan 01 2024").
+     * @param date The LocalDate object to format.
+     * @return The formatted date string.
+     */
+    public static String formatDate(LocalDate date) {
+        return date.format(OUTPUT_DATE_FORMATTER);
     }
 
-    public static String[] parseDeadlineTask(String userInput) {
-        String[] information = userInput.split("/by");
-        information[0] = information[0].replace("deadline ", "");
-        return information;
+    /**
+     * Parses a deadline task input into description and deadline.
+     * @param userInput The full user input string.
+     * @return A string array containing the task description and deadline.
+     */
+    public static String[] extractDeadlineDetails(String userInput) {
+        String[] parts = userInput.split(" /by ", 2);
+        parts[0] = parts[0].replaceFirst("^deadline ", "").trim();
+        return parts;
     }
 
-    public static String[] parseEventTask(String userInput) {
-        String[] information = userInput.split("/from | /to");
-        information[0] = information[0].replace("event ", "");
-        return information;
+    /**
+     * Parses an event task input into description, start time, and end time.
+     * @param userInput The full user input string.
+     * @return A string array containing the task description, start time, and end time.
+     */
+    public static String[] extractEventDetails(String userInput) {
+        String[] parts = userInput.split(" /from | /to ", 3);
+        parts[0] = parts[0].replaceFirst("^event ", "").trim();
+        return parts;
     }
 
-    public static String parseToDoTask(String userInput) throws KifException {
-        String parsed = userInput.replace("todo", "");
-
-        if(parsed.trim().isEmpty()) {
-            throw new KifException(
-                    """
-                    ____________________________________________________________
-                    OOPS!!! The description of a todo cannot be empty.
-                    ____________________________________________________________"""
-            );
+    /**
+     * Extracts the description from a ToDo task input.
+     * @param userInput The full user input string.
+     * @return The task description.
+     * @throws KifException If the description is empty.
+     */
+    public static String extractToDoDescription(String userInput) throws KifException {
+        String description = userInput.replaceFirst("^todo", "").trim();
+        if (description.isEmpty()) {
+            throw new KifException(EMPTY_TODO_ERROR);
         }
-        return parsed.trim();
+        return description;
     }
 }
