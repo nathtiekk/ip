@@ -145,8 +145,9 @@ Goodbye! Have a great day!
 - For deadlines, Kif ensures the date format follows `yyyy-MM-dd`. If incorrect, it prompts the user to reformat.
 
 ## Command Summary
+
 | Command | Description |
-|---------|-------------|
+|---------|----------------------------------|
 | `list` | Displays all tasks |
 | `mark <task_number>` | Marks a task as done |
 | `unmark <task_number>` | Unmarks a task |
@@ -155,7 +156,7 @@ Goodbye! Have a great day!
 | `event <description> /from <yyyy-MM-dd> /to <yyyy-MM-dd>` | Adds an event task |
 | `delete <task_number>` | Deletes a task |
 | `undo` | Undoes the last command |
-| `bye` | Exits the application |
+| `bye` | Exits the application 
 
 ## Work In Progress
 - The `event` command currently treats dates and times as plain text instead of parsing them.
