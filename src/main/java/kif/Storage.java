@@ -7,123 +7,118 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.List;
 
 public class Storage {
+
     private static final String FILE_PATH = "tasks.txt";
     public static final String KEYWORD = "kifReservedKeyword";
+
     /**
-     * Loads up all the tasks saved previously by the user
-     * and catches FileNotFoundException, and KifException when file is not found,
-     * and when the file contents happen to not be readable respectively.
+     * Loads user tasks from the saved file.
      */
     public static void initialiseUserTasks() {
-        try {
-            File f = new File(FILE_PATH);
-            Scanner s = new Scanner(f);
-            while (s.hasNextLine()) {
-                String line = s.nextLine();
-                String[] description = line.split(KEYWORD);
-                if (description.length == 2) {
-                    Task t = new Task.ToDo(description[1]);
-                    t.isDone = Boolean.parseBoolean(description[0].trim());
-                    Task.addTaskToList(t);
-                }
-                else if (description.length == 4) {
-                    Task t = new Task.Event(description[1], description[2], description[3]);
-                    t.isDone = Boolean.parseBoolean(description[0].trim());
-                    Task.addTaskToList(t);
-                }
-                else if (description.length == 3) {
-                    Task t = new Task.Deadline(description[1], description[2]);
-                    t.isDone = Boolean.parseBoolean(description[0].trim());
-                    Task.addTaskToList(t);
-                }
+        File file = new File(FILE_PATH);
+
+        if (!file.exists()) return;
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                parseAndAddTask(scanner.nextLine());
             }
         } catch (FileNotFoundException e) {
-            //do nothing
+            System.err.println("No saved task file.");
         } catch (KifException e) {
-            System.out.println(e.getMessage());
+            System.err.println("Error reading task file: " + e.getMessage());
         }
     }
 
+    private static void parseAndAddTask(String line) throws KifException {
+        String[] details = line.split(KEYWORD);
+        Task task;
+
+        switch (details.length) {
+        case 2 -> task = new Task.ToDo(details[1]);
+        case 3 -> task = new Task.Deadline(details[1], details[2]);
+        case 4 -> task = new Task.Event(details[1], details[2], details[3]);
+        default -> throw new KifException("Invalid task format: " + line);
+        }
+
+        task.isDone = Boolean.parseBoolean(details[0].trim());
+        Task.addTask(task);
+    }
+
+    /**
+     * Edits a specific task in the file (mark, unmark, or delete).
+     */
     public static void editTaskTxt(int lineNumber, Kif.UserCommand operation) {
-        ArrayList<String> preItems = new ArrayList<>();
-        ArrayList<String> postItems = new ArrayList<>();
-        ArrayList<String> editLines = new ArrayList<>();
-        try {
-            File f = new File(FILE_PATH);
-            Scanner s = new Scanner(f);
-            int counter = 1;
-            while (s.hasNextLine()) {
-                String line = s.nextLine();
-                if (counter == lineNumber) {
-                    editLines.add(line);
-                }
-                else if (counter < lineNumber) {
-                    preItems.add(line);
-                } else {
-                    postItems.add(line);
-                }
-                counter++;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        List<String> lines = readAllLines();
+
+        if (lineNumber < 1 || lineNumber > lines.size()) {
+            throw new IndexOutOfBoundsException("Invalid line number");
         }
 
-        FileWriter fw;
-        try {
-            fw = new FileWriter(FILE_PATH, false);
-            for (String line : preItems) {
-                fw.write(line + "\n");
-            }
+        switch (operation) {
+        case MARK -> lines.set(lineNumber - 1, lines.get(lineNumber - 1).replaceFirst("false", "true"));
+        case UNMARK -> lines.set(lineNumber - 1, lines.get(lineNumber - 1).replaceFirst("true", "false"));
+        case DELETE -> lines.remove(lineNumber - 1);
+        }
 
-            String newLine = "";
-            switch (operation) {
-            case MARK:
-                newLine = editLines.get(0).replaceFirst("false", "true");
-                fw.write(newLine + "\n");
-                break;
-            case UNMARK:
-                newLine = editLines.get(0).replaceFirst("true", "false");
-                fw.write(newLine + "\n");
-                break;
-            case DELETE:
-                fw.write(newLine);
-                break;
-            }
+        writeAllLines(lines);
+    }
 
-            for (String line : postItems) {
-                fw.write(line + "\n");
+    /**
+     * Reads all lines from the task file.
+     */
+    private static List<String> readAllLines() {
+        List<String> lines = new ArrayList<>();
+        try (Scanner scanner = new Scanner(new File(FILE_PATH))) {
+            while (scanner.hasNextLine()) {
+                lines.add(scanner.nextLine());
             }
-            fw.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: Task file not found.");
+        }
+        return lines;
+    }
+
+    /**
+     * Writes all lines back to the task file (used for editing and deleting tasks).
+     */
+    private static void writeAllLines(List<String> lines) {
+        try (FileWriter fw = new FileWriter(FILE_PATH, false)) {
+            for (String line : lines) {
+                fw.write(line + System.lineSeparator());
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error updating task file.", e);
         }
     }
 
-    public static void writeTask(Object taskObject) {
-        FileWriter fw;
-        Task task = (Task) taskObject;
-        try {
-            fw = new FileWriter(FILE_PATH, true);
-            if (task.type == Task.TaskType.TODO) {
-                fw.write(task.isDone + KEYWORD + task.description + "\n");
-            } else if (task.type == Task.TaskType.EVENT) {
-                if (task instanceof Task.Event eventTask) {
-                    fw.write(eventTask.isDone + KEYWORD + task.description
-                            + KEYWORD + eventTask.start
-                            + KEYWORD + eventTask.end + "\n");
-                }
-            } else if (task.type == Task.TaskType.DEADLINE) {
-                if (task instanceof Task.Deadline deadlineTask) {
-                    fw.write(deadlineTask.isDone + KEYWORD + task.description
-                            + KEYWORD + deadlineTask.by + "\n");
-                }
-            }
-            Task.addTaskToList(task);
-            fw.close();
+    /**
+     * Writes a new task to the file.
+     */
+    public static void writeTask(Object t) {
+        Task task = (Task) t;
+        try (FileWriter fw = new FileWriter(FILE_PATH, true)) {
+            fw.write(formatTask(task) + System.lineSeparator());
+            Task.addTask(task);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error writing task to file.", e);
         }
+    }
+
+    private static String formatTask(Task task) {
+        return switch (task.type) {
+            case TODO -> task.isDone + KEYWORD + task.description;
+            case DEADLINE -> {
+                Task.Deadline deadline = (Task.Deadline) task;
+                yield deadline.isDone + KEYWORD + deadline.description + KEYWORD + deadline.getDeadline();
+            }
+            case EVENT -> {
+                Task.Event event = (Task.Event) task;
+                yield event.isDone + KEYWORD + event.description + KEYWORD + event.getStart() + KEYWORD + event.getEnd();
+            }
+        };
     }
 }
