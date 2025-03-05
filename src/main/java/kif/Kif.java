@@ -36,6 +36,8 @@ public class Kif {
     }
 
     private static String restoreDeletedTask() throws KifException {
+        assert previousTask != null : "Previous task should not be null when restoring";
+
         Task restoredTask;
 
         if (previousTask instanceof Task.Deadline) {
@@ -88,6 +90,7 @@ public class Kif {
     }
 
     private static String undo() throws KifException {
+        assert previousCommand != null : "Previous command should not be null before undo";
         String result = undoPrevCommand();
         previousCommand = UserCommand.UNDO;
         previousTask = null;
@@ -95,18 +98,26 @@ public class Kif {
     }
 
     private static String updateTaskStatus(int index, boolean isMarking) {
+        assert index >= 0 : "Task index should be non-negative";
+
         previousTask = Task.getTask(index);
+        assert previousTask != null : "Previous task should not be null when updating";
+
         previousCommand = isMarking ? UserCommand.MARK : UserCommand.UNMARK;
         return isMarking ? Task.markTask(index) : Task.unmarkTask(index);
     }
 
     private static String createTask(Task task) {
+        assert task != null : "Task should not be null when creating";
+
         previousTask = task;
         previousCommand = determineTaskCommand(task);
         return Task.createTaskMsg(task);
     }
 
     private static UserCommand determineTaskCommand(Task task) {
+        assert task != null : "Task cannot be null when determining command";
+
         if (task instanceof Task.Deadline) {
             return UserCommand.DEADLINE;
         } else if (task instanceof Task.Event) {
@@ -117,7 +128,11 @@ public class Kif {
     }
 
     private static String deleteTask(int index) {
+        assert index >= 0 : "Task index should be non-negative";
+
         previousTask = Task.getTask(index);
+        assert previousTask != null : "Previous task should not be null when deleting";
+
         previousCommand = UserCommand.DELETE;
         return Task.deleteTask(index);
     }
