@@ -22,6 +22,14 @@ abstract class Task {
         this.type = type;
     }
 
+    public static int getTotalTasks() {
+        return userTasks.size();
+    }
+
+    public static void clearTasks() {
+        userTasks.clear();
+    }
+
     public enum TaskType {TODO, DEADLINE, EVENT}
 
     public static void addTask(Task task) {

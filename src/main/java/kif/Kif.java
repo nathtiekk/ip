@@ -21,7 +21,7 @@ public class Kif {
         UNDO,
     }
 
-    private static String undoPrevCommand() throws KifException {
+    static String undoPrevCommand() throws KifException {
         if (previousCommand == null || previousTask == null) {
             return Ui.getCannotUndoMessage();
         }
@@ -70,7 +70,7 @@ public class Kif {
         return response.toString();
     }
 
-    private static String handleCommand(UserCommand command, String[] splitMessage, String userMessage) throws KifException {
+    static String handleCommand(UserCommand command, String[] splitMessage, String userMessage) throws KifException {
         if (command == UserCommand.LIST) {
             previousCommand = command;
             previousTask = null;
