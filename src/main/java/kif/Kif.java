@@ -9,6 +9,9 @@ public class Kif {
     static UserCommand previousCommand;
     static Task previousTask;
 
+    /**
+     * Enum representing possible user commands.
+     */
     public enum UserCommand {
         LIST,
         MARK,
@@ -21,6 +24,12 @@ public class Kif {
         UNDO,
     }
 
+    /**
+     * Undoes the previous user command if possible.
+     *
+     * @return A response message indicating the undo result.
+     * @throws KifException If an error occurs while undoing the command.
+     */
     static String undoPrevCommand() throws KifException {
         if (previousCommand == null || previousTask == null) {
             return Ui.getCannotUndoMessage();
@@ -35,6 +44,12 @@ public class Kif {
         };
     }
 
+    /**
+     * Restores a previously deleted task.
+     *
+     * @return A response message indicating the restored task or an error message.
+     * @throws KifException If an error occurs while restoring the task.
+     */
     private static String restoreDeletedTask() throws KifException {
         assert previousTask != null : "Previous task should not be null when restoring";
 
@@ -57,6 +72,12 @@ public class Kif {
         return Task.createTaskMsg(restoredTask);
     }
 
+    /**
+     * Processes the user message and returns an appropriate response.
+     *
+     * @param userMessage The message input by the user.
+     * @return The chatbot's response based on the user's command.
+     */
     public static String getResponse(String userMessage) {
         StringBuilder response = new StringBuilder();
         String[] splitMessage = Parser.splitUserInput(userMessage);
@@ -70,6 +91,15 @@ public class Kif {
         return response.toString();
     }
 
+    /**
+     * Handles user commands and executes corresponding actions.
+     *
+     * @param command The parsed user command.
+     * @param splitMessage The split message components from user input.
+     * @param userMessage The full raw user input.
+     * @return A response message indicating the outcome of the command.
+     * @throws KifException If an error occurs while processing the command.
+     */
     static String handleCommand(UserCommand command, String[] splitMessage, String userMessage) throws KifException {
         if (command == UserCommand.LIST) {
             previousCommand = command;
@@ -89,6 +119,12 @@ public class Kif {
         };
     }
 
+    /**
+     * Undoes the last user action.
+     *
+     * @return A response message indicating the undo result.
+     * @throws KifException If an error occurs while undoing.
+     */
     private static String undo() throws KifException {
         assert previousCommand != null : "Previous command should not be null before undo";
         String result = undoPrevCommand();
@@ -97,6 +133,13 @@ public class Kif {
         return result;
     }
 
+    /**
+     * Updates the status of a task (mark/unmark).
+     *
+     * @param index The index of the task to update.
+     * @param isMarking Whether the task is being marked as done or not.
+     * @return A response message indicating the updated task status.
+     */
     private static String updateTaskStatus(int index, boolean isMarking) {
         assert index >= 0 : "Task index should be non-negative";
 
@@ -107,6 +150,12 @@ public class Kif {
         return isMarking ? Task.markTask(index) : Task.unmarkTask(index);
     }
 
+    /**
+     * Creates a new task and adds it to the task list.
+     *
+     * @param task The task to be created.
+     * @return A response message indicating the created task details.
+     */
     private static String createTask(Task task) {
         assert task != null : "Task should not be null when creating";
 
@@ -115,6 +164,12 @@ public class Kif {
         return Task.createTaskMsg(task);
     }
 
+    /**
+     * Determines the corresponding user command for a given task.
+     *
+     * @param task The task for which the command is being determined.
+     * @return The corresponding UserCommand (DEADLINE, EVENT, TODO).
+     */
     private static UserCommand determineTaskCommand(Task task) {
         assert task != null : "Task cannot be null when determining command";
 

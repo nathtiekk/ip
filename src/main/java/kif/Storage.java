@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.List;
 
+/**
+ * The {@code Storage} class handles file operations for saving and retrieving user tasks.
+ * It manages reading, writing, updating, and deleting tasks from a persistent storage file.
+ */
 public class Storage {
 
     private static final String FILE_PATH = "tasks.txt";
@@ -49,7 +53,11 @@ public class Storage {
     }
 
     /**
-     * Edits a specific task in the file (mark, unmark, or delete).
+     * Edits an existing task in the file. Supports marking, unmarking, or deleting tasks.
+     *
+     * @param lineNumber The line number of the task in the file (1-based index).
+     * @param operation  The operation to perform (MARK, UNMARK, DELETE).
+     * @throws IndexOutOfBoundsException If the specified line number is invalid.
      */
     public static void editTaskTxt(int lineNumber, Kif.UserCommand operation) {
         List<String> lines = readAllLines();
@@ -96,7 +104,10 @@ public class Storage {
     }
 
     /**
-     * Writes a new task to the file.
+     * Writes a new task to the storage file and adds it to memory.
+     *
+     * @param t The task to write (should be an instance of {@code Task}).
+     * @throws RuntimeException If an I/O error occurs.
      */
     public static void writeTask(Object t) {
         Task task = (Task) t;

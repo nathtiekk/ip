@@ -16,26 +16,49 @@ abstract class Task {
     protected boolean isDone;
     protected TaskType type;
 
+    /**
+     * Constructs a new {@code Task}.
+     *
+     * @param description The task description.
+     * @param type The type of the task (TODO, DEADLINE, or EVENT).
+     */
     public Task(String description, TaskType type) {
         this.description = description;
         this.isDone = false;
         this.type = type;
     }
 
+    /**
+     * Returns the total number of tasks in the list.
+     *
+     * @return The total task count.
+     */
     public static int getTotalTasks() {
         return userTasks.size();
     }
 
+    /**
+     * Clears all tasks from the list for the purpose of unit testing.
+     */
     public static void clearTasks() {
         userTasks.clear();
     }
 
+    /**
+     * Represents the types of tasks available.
+     */
     public enum TaskType {TODO, DEADLINE, EVENT}
 
     public static void addTask(Task task) {
         userTasks.add(task);
     }
 
+    /**
+     * Creates a formatted message confirming task addition.
+     *
+     * @param task The task that was added.
+     * @return A formatted confirmation message.
+     */
     public static String createTaskMsg(Task task) {
         return formatMessage("Got it. I've added this task:", task.toString(), printTotalTasks());
     }
@@ -112,10 +135,22 @@ abstract class Task {
         return formatMessage("Noted. I've removed this task:", task.toString(), printTotalTasks());
     }
 
+    /**
+     * Retrieves a task at the specified index.
+     *
+     * @param index The task index (1-based).
+     * @return The task at the given index.
+     */
     public static Task getTask(int index) {
         return userTasks.get(index - 1);
     }
 
+    /**
+     * Retrieves the index of a specific task.
+     *
+     * @param t The task to find.
+     * @return The 1-based index of the task, or -1 if not found.
+     */
     public static int getTaskIndex(Task t) {
         for (int index = 0; index < userTasks.size(); index++) {
             if (userTasks.get(index).equals(t)) {
@@ -132,6 +167,7 @@ abstract class Task {
      */
     public static class Deadline extends Task {
         private final LocalDate by;
+
 
         public Deadline(String description, String by) throws KifException {
             super(description, TaskType.DEADLINE);
